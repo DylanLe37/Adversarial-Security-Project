@@ -28,7 +28,7 @@ def loadEmber(dataPath="/home/dylan/Documents/Adversarial-Security-Project/Data/
     subSet = next(pf.iter_batches(batch_size=int(sampleCount/4)))
     xTest = pa.Table.from_batches([subSet]).to_pandas()
     xTest = xTest.drop(columns=['Label']).values
-    yTest = yTrain[:int(sampleCount/4)]
+    yTest = yTest[:int(sampleCount/4)]
 
     scaler = StandardScaler()
     xTrain = scaler.fit_transform(xTrain)
