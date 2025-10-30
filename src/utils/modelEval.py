@@ -33,7 +33,7 @@ def plotConfMat(yTrue,yPreds,savePath=None):
     plt.ylabel('Predicted label')
 
     if savePath:
-        plt.savefig(savePath,format='pdf',bbox_inches='tight')
+        plt.savefig(savePath,format='png',bbox_inches='tight')
     plt.show()
 
 def plotROC(yTrue,yProbs,savePath=None):
@@ -50,5 +50,5 @@ def plotROC(yTrue,yProbs,savePath=None):
     plt.grid(alpha=0.3)
 
     if savePath:
-        plt.savefig(savePath,format='pdf',bbox_inches='tight')
+        plt.savefig(savePath,format='png',bbox_inches='tight')
     plt.show()

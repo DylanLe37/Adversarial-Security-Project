@@ -30,5 +30,5 @@ print(f'\n ROC-AUC: {metrics['roc_auc']:.4f}')
 print(f'\n Making figures...')
 os.makedirs('Results/Figures',exist_ok=True)
 
-plotConfMat(yTest,preds,'Results/Figures/ConfusionMatrixBaseline.pdf')
-plotROC(yTest,probs,'Results/Figures/ROCCurveBaseline.pdf')
+plotConfMat(yTest,preds,'Results/Figures/ConfusionMatrixBaseline.png')
+plotROC(yTest,probs,'Results/Figures/ROCCurveBaseline.png')
