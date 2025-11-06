@@ -4,7 +4,7 @@ import numpy as np
 from art.attacks.evasion import FastGradientMethod
 from art.estimators.classification import PyTorchClassifier
 
-def FGSM(model,X,y,eps=0.1,device='cpu'):
+def FGSM(model,X,y,eps=0.1,device='cpu',verbose=True):
 
     criterion = nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters())
@@ -26,8 +26,6 @@ def FGSM(model,X,y,eps=0.1,device='cpu'):
         num_random_init=0,
         batch_size=128
     )
-
-    print(f'Performing FGSM attack...')
 
     xAdv = attack.generate(x=X)
 
@@ -70,14 +68,15 @@ def FGSM(model,X,y,eps=0.1,device='cpu'):
     attackMetrics['averagePerturbation'] = np.mean(np.abs(perturbation))
     attackMetrics['maxPerturbation'] = np.max(np.abs(perturbation))
 
-    print(f'Clean Acc:{attackMetrics['cleanAccuracy']:.2%}')
-    print(f'Adversarial Acc:{attackMetrics['advAccuracy']:.2%}')
-    print(f'Acc drop:{attackMetrics['accuracyDrop']:.2%}')
-    print(f'Attack Success Rate:{attackMetrics['successRate']:.2%}')
-    print(f'Malware Evasion Rate: {attackMetrics['malwareEvasionRate']:.2%}')
-    print(f'False Positive Rate: {attackMetrics['falsePositiveRate']:.2%}')
-    print(f'Average Perturbation:{attackMetrics['averagePerturbation']:.4f}')
-    print(f'Max Perturbation:{attackMetrics['maxPerturbation']:.4f}')
+    if verbose==True:
+        print(f'Clean Acc:{attackMetrics['cleanAccuracy']:.2%}')
+        print(f'Adversarial Acc:{attackMetrics['advAccuracy']:.2%}')
+        print(f'Acc drop:{attackMetrics['accuracyDrop']:.2%}')
+        print(f'Attack Success Rate:{attackMetrics['successRate']:.2%}')
+        print(f'Malware Evasion Rate: {attackMetrics['malwareEvasionRate']:.2%}')
+        print(f'False Positive Rate: {attackMetrics['falsePositiveRate']:.2%}')
+        print(f'Average Perturbation:{attackMetrics['averagePerturbation']:.4f}')
+        print(f'Max Perturbation:{attackMetrics['maxPerturbation']:.4f}')
 
     return xAdv,attackMetrics
 

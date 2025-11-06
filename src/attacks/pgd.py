@@ -5,7 +5,7 @@ from art.attacks.evasion import FastGradientMethod, ProjectedGradientDescent
 from art.estimators.classification import PyTorchClassifier
 import copy
 
-def PGD(model,X,y,eps=0.1,eps_step=0.01,maxIter = 40,device='cpu'):
+def PGD(model,X,y,eps=0.1,eps_step=0.01,maxIter = 40,device='cpu',verbose=True):
     
     criterion = nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters())
@@ -28,8 +28,6 @@ def PGD(model,X,y,eps=0.1,eps_step=0.01,maxIter = 40,device='cpu'):
         num_random_init=0,
         batch_size=128
     )
-
-    print('Performing PGD Attack...')
 
     xAdv = attack.generate(x=X)
 
@@ -72,16 +70,17 @@ def PGD(model,X,y,eps=0.1,eps_step=0.01,maxIter = 40,device='cpu'):
     attackMetrics['averagePerturbation'] = np.mean(np.abs(perturbation))
     attackMetrics['maxPerturbation'] = np.max(np.abs(perturbation))
     attackMetrics['L2Perturbation'] = np.mean(np.linalg.norm(perturbation,axis=1))
-
-    print(f'Clean Acc:{attackMetrics['cleanAccuracy']:.2%}')
-    print(f'Adversarial Acc:{attackMetrics['advAccuracy']:.2%}')
-    print(f'Acc drop:{attackMetrics['accuracyDrop']:.2%}')
-    print(f'Attack Success Rate:{attackMetrics['successRate']:.2%}')
-    print(f'Malware Evasion Rate: {attackMetrics['malwareEvasionRate']:.2%}')
-    print(f'False Positive Rate: {attackMetrics['falsePositiveRate']:.2%}')
-    print(fr'Average Linf:{attackMetrics['averagePerturbation']:.4f}')
-    print(fr'Max Linf:{attackMetrics['maxPerturbation']:.4f}')
-    print(fr'Average L2:{attackMetrics['L2Perturbation']:.4f}')
+    
+    if verbose==True:
+        print(f'Clean Acc:{attackMetrics['cleanAccuracy']:.2%}')
+        print(f'Adversarial Acc:{attackMetrics['advAccuracy']:.2%}')
+        print(f'Acc drop:{attackMetrics['accuracyDrop']:.2%}')
+        print(f'Attack Success Rate:{attackMetrics['successRate']:.2%}')
+        print(f'Malware Evasion Rate: {attackMetrics['malwareEvasionRate']:.2%}')
+        print(f'False Positive Rate: {attackMetrics['falsePositiveRate']:.2%}')
+        print(fr'Average Linf:{attackMetrics['averagePerturbation']:.4f}')
+        print(fr'Max Linf:{attackMetrics['maxPerturbation']:.4f}')
+        print(fr'Average L2:{attackMetrics['L2Perturbation']:.4f}')
 
     return xAdv, attackMetrics
 
