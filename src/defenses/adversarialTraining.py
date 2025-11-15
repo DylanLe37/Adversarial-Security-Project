@@ -93,7 +93,7 @@ def trainWithAdvEx(model,xTrain,yTrain,xTest,yTest,attackType='pgd',eps=0.1,epoc
 if __name__ == '__main__':
     xTrain,yTrain,xTest,yTest = loadEmber()
 
-    model = malwareDetector(input_dim = xTrain.shape[1])
+    model = malwareDetector(inputDim = xTrain.shape[1])
     device = torch.device('cpu')
     model = model.to(device)
 
