@@ -20,6 +20,14 @@ class DistilledModel(nn.Module):
         self.baseModel = baseModel
         self.temp = temp
 
+    def getLogits(self,x):
+        xOut = x
+        for i,layer in enumerate(self.baseModel.network):
+            if i == len(self.baseModel.network)-1:
+                break
+            xOut = layer(xOut)
+        return xOut
+
     def forward(self,x,useTemp=False):
         logits = self.baseModel.network[:-1](x)
         if useTemp:
@@ -27,49 +35,49 @@ class DistilledModel(nn.Module):
         else:
             return torch.sigmoid(logits)
 
-def trainTeacher(model,xTrain,yTrain,xTest,yTest,temp=20,epochs=15,batchSize=128,learningRate=0.001,device='cpu'):
-    print(f'Training teacher model')
+# def trainTeacher(model,xTrain,yTrain,xTest,yTest,temp=20,epochs=15,batchSize=128,learningRate=0.001,device='cpu'): #just use baseline
+#     print(f'Training teacher model')
+#
+#     teacher = DistilledModel(model,temp=temp)
+#
+#     xTrainTens = torch.FloatTensor(xTrain).to(device)
+#     yTrainTens = torch.FloatTensor(yTrain).unsqueeze(1).to(device)
+#     xTestTens = torch.FloatTensor(xTest).to(device)
+#     yTestTens = torch.LongTensor(yTest)
+#
+#     trainData = TensorDataset(xTrainTens, yTrainTens)
+#     trainLoader = DataLoader(trainData,batch_size=batchSize,shuffle=True)
+#
+#     criterion = nn.BCELoss()
+#     optimizer = optim.Adam(teacher.parameters(),lr=learningRate)
+#
+#     for epoch in range(epochs):
+#         teacher.train()
+#         totalLoss = 0
+#
+#         for batchX,batchY in tqdm(trainLoader,desc=f'Epoch {epoch+1}/{epochs}'):
+#             outputs = teacher(batchX,useTemp=True)
+#             loss = criterion(outputs,batchY)
+#
+#             optimizer.zero_grad()
+#             loss.backward()
+#             optimizer.step()
+#
+#             totalLoss += loss.item()
+#
+#         averageLoss = totalLoss/len(trainLoader)
+#         print(f'Training Loss: {averageLoss:.4f}')
+#
+#         teacher.eval()
+#         with torch.no_grad():
+#             outputs = teacher(xTestTens,useTemp=False)
+#             preds = (outputs.cpu().numpy().flatten()>0.5).astype(int)
+#             accuracy = np.mean(preds==yTestTens.numpy())
+#             print(f'Test Accuracy: {accuracy:.4f}')
+#
+#     return teacher
 
-    teacher = DistilledModel(model,temp=temp)
-
-    xTrainTens = torch.FloatTensor(xTrain).to(device)
-    yTrainTens = torch.FloatTensor(yTrain).unsqueeze(1).to(device)
-    xTestTens = torch.FloatTensor(xTest).to(device)
-    yTestTens = torch.LongTensor(yTest)
-
-    trainData = TensorDataset(xTrainTens, yTrainTens)
-    trainLoader = DataLoader(trainData,batch_size=batchSize,shuffle=True)
-
-    criterion = nn.BCELoss()
-    optimizer = optim.Adam(teacher.parameters(),lr=learningRate)
-
-    for epoch in range(epochs):
-        teacher.train()
-        totalLoss = 0
-
-        for batchX,batchY in tqdm(trainLoader,desc=f'Epoch {epoch+1}/{epochs}'):
-            outputs = teacher(batchX,useTemp=True)
-            loss = criterion(outputs,batchY)
-
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            totalLoss += loss.item()
-
-        averageLoss = totalLoss/len(trainLoader)
-        print(f'Training Loss: {averageLoss:.4f}')
-
-        teacher.eval()
-        with torch.no_grad():
-            outputs = teacher(xTestTens,useTemp=False)
-            preds = (outputs.cpu().numpy().flatten()>0.5).astype(int)
-            accuracy = np.mean(preds==yTestTens.numpy())
-            print(f'Test Accuracy: {accuracy:.4f}')
-
-    return teacher
-
-def trainStudent(teacher,xTrain,yTrain,xTest,yTest,temp=20,epochs=15,batchSize=128,learningRate=0.001,device='cpu'):
+def trainStudent(teacher,xTrain,yTrain,xTest,yTest,temp=20,epochs=15,batchSize=128,learningRate=0.001,device='cpu',attackType='pgd'):
     print(f'Training student model')
 
     studentBase = malwareDetector(inputDim=xTrain.shape[1])
@@ -129,7 +137,7 @@ def trainStudent(teacher,xTrain,yTrain,xTest,yTest,temp=20,epochs=15,batchSize=1
 
 def defensiveDistillation(xTrain,yTrain,xTest,yTest,temp=20,device='cpu'):
     checkpoint = torch.load('Results/models/malwareDetectorBest.pth')
-    teacherBase = malwareDetector(inputDim=xTrain.shape[1])
+    teacherBase = malwareDetector(inputDim=xTrain.shape[1]) #just use baseline model for now
     teacherBase.load_state_dict(checkpoint['model_state_dict'])
 
     teacher = DistilledModel(teacherBase,temp=temp).to(device)
@@ -137,10 +145,13 @@ def defensiveDistillation(xTrain,yTrain,xTest,yTest,temp=20,device='cpu'):
 
     with torch.no_grad():
         xTestTens = torch.FloatTensor(xTest).to(device)
-        outputs = teacher(xTestTens,useTemp=False)
-        preds = (outputs.cpu().numpy().flatten()>0.5).astype(int)
+        outputs = teacher(xTestTens,useTemp=False).cpu().numpy().flatten()
+        softOutputs = teacher(xTestTens,useTemp=True).cpu().numpy().flatten()
+        preds = (outputs>0.5).astype(int)
         teacherAcc = np.mean(preds==yTest)
         print(f'Teacher Accuracy: {teacherAcc:.4f}')
+        print(f'Hard output mean:{outputs.mean():.4f},\nSoft output mean:{softOutputs.mean():.4f}')
+        print(f'Hard output std:{outputs.std():.4f},\nSoft output std:{softOutputs.std():.4f}')
 
     student = trainStudent(teacher,xTrain,yTrain,xTest,yTest,temp=temp,epochs=15,device=device)
 
@@ -165,9 +176,15 @@ if __name__ == '__main__':
     ySamp = yTest[:1000]
 
     baseModel = studentModel.baseModel
+    baserModel = copy.deepcopy(baseModel)
     baseModel.eval()
 
-    xAdv,metrics = PGD(baseModel,xSamp,ySamp,eps=0.1)
+    _,metrics = FGSM(baseModel,xSamp,ySamp,eps=0.1,verbose=False)
 
     print(f'Clean Accuracy:{metrics['cleanAccuracy']:.4f}')
-    print(f'Robust Accuracy:{metrics['advAccuracy']:.4f}')
+    print(f'Robust (FGSM) Accuracy:{metrics['advAccuracy']:.4f}')
+
+    _, metrics = PGD(baserModel, xSamp, ySamp, eps=0.1,verbose=False)
+
+    print(f'Clean Accuracy:{metrics['cleanAccuracy']:.4f}')
+    print(f'Robust (PGD) Accuracy:{metrics['advAccuracy']:.4f}')

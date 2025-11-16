@@ -1,0 +1,21 @@
+Model,Attack,Epsilon,Accuracy
+Baseline,Clean,0.0,0.935
+Baseline,FGSM,0.1,0.595
+Baseline,FGSM,0.2,0.595
+Baseline,PGD,0.1,0.593
+Baseline,PGD,0.2,0.593
+Defensive Distillation,Clean,0.0,0.918
+Defensive Distillation,FGSM,0.1,0.602
+Defensive Distillation,FGSM,0.2,0.601
+Defensive Distillation,PGD,0.1,0.599
+Defensive Distillation,PGD,0.2,0.599
+FGSM Training,Clean,0.0,0.927
+FGSM Training,FGSM,0.1,0.925
+FGSM Training,FGSM,0.2,0.861
+FGSM Training,PGD,0.1,0.718
+FGSM Training,PGD,0.2,0.595
+PGD Training,Clean,0.0,0.907
+PGD Training,FGSM,0.1,0.874
+PGD Training,FGSM,0.2,0.788
+PGD Training,PGD,0.1,0.819
+PGD Training,PGD,0.2,0.676

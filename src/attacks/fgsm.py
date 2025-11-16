@@ -8,7 +8,8 @@ def FGSM(model,X,y,eps=0.1,device='cpu',verbose=True):
 
     criterion = nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters())
-
+    # optimizer = None
+    
     classifier = PyTorchClassifier(
         model=model,
         loss=criterion,
@@ -89,7 +90,7 @@ if __name__ == '__main__':
     _,_,xTest,yTest = loadEmber()
 
     checkpoint = torch.load('Results/models/malwareDetectorBest.pth')
-    model=malwareDetector(input_dim=xTest.shape[1])
+    model=malwareDetector(inputDim=xTest.shape[1])
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
 

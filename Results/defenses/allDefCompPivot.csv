@@ -1,0 +1,6 @@
+Attack,Epsilon,Baseline,Defensive Distillation,FGSM Training,PGD Training
+Clean,0.0,0.935,0.918,0.927,0.907
+FGSM,0.1,0.595,0.602,0.925,0.874
+FGSM,0.2,0.595,0.601,0.861,0.788
+PGD,0.1,0.593,0.599,0.718,0.819
+PGD,0.2,0.593,0.599,0.595,0.676

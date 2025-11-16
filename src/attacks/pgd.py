@@ -9,6 +9,7 @@ def PGD(model,X,y,eps=0.1,eps_step=0.01,maxIter = 40,device='cpu',verbose=True):
     
     criterion = nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters())
+    # optimizer = None
 
     classifier = PyTorchClassifier(
         model=model,
@@ -96,7 +97,7 @@ if __name__ == '__main__':
     ySamp = yTest[:1000]
 
     checkpoint = torch.load('Results/models/malwareDetectorBest.pth')
-    model = malwareDetector(input_dim=xTest.shape[1])
+    model = malwareDetector(inputDim=xTest.shape[1])
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
     

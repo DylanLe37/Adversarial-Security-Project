@@ -7,6 +7,7 @@ from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 from tqdm import tqdm
 import os
+import copy
 
 from model.detectionModel import malwareDetector
 from utils.dataLoad import loadEmber
@@ -96,10 +97,20 @@ if __name__ == '__main__':
     model = malwareDetector(inputDim = xTrain.shape[1])
     device = torch.device('cpu')
     model = model.to(device)
+    modeler = copy.deepcopy(model)
 
-    model = trainWithAdvEx(
+    pgdModel = trainWithAdvEx(
         model,xTrain,yTrain,xTest,yTest,
         attackType ='pgd',
+        eps=0.1,
+        epochs=15,
+        device=device)
+
+    print('FGSM Trained Model:')
+
+    fgsmModel = trainWithAdvEx(
+        modeler,xTrain,yTrain,xTest,yTest,
+        attackType ='fgsm',
         eps=0.1,
         epochs=15,
         device=device)
