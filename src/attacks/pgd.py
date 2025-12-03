@@ -9,8 +9,7 @@ def PGD(model,X,y,eps=0.1,eps_step=0.01,maxIter = 40,device='cpu',verbose=True):
     
     criterion = nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters())
-    # optimizer = None
-
+    
     classifier = PyTorchClassifier(
         model=model,
         loss=criterion,

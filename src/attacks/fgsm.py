@@ -8,7 +8,6 @@ def FGSM(model,X,y,eps=0.1,device='cpu',verbose=True):
 
     criterion = nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters())
-    # optimizer = None
     
     classifier = PyTorchClassifier(
         model=model,

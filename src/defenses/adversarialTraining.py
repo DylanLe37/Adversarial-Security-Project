@@ -48,7 +48,6 @@ def trainWithAdvEx(model,xTrain,yTrain,xTest,yTest,attackType='pgd',eps=0.1,epoc
             else:
                 batchXAdv,_ = PGD(model,batchXNP,batchYNP,eps=eps,eps_step=eps/10,maxIter=10,verbose=False)
 
-            # batchXAdv = np.array(batchXAdv)
             batchXAdv = torch.FloatTensor(batchXAdv).to(device)
 
             combinedX = torch.cat([batchX,batchXAdv],dim=0)

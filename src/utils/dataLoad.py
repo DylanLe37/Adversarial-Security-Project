@@ -4,9 +4,8 @@ from sklearn.preprocessing import StandardScaler
 from pyarrow.parquet import ParquetFile
 import pyarrow as pa
 
-def loadEmber(dataPath="/home/dylan/Documents/Adversarial-Security-Project/Data/Ember",sampleCount=250000): #no ram need subsamp, data has no struct so can take whatever
+def loadEmber(dataPath="/path/to/ember/dataset/",sampleCount=250000): #no ram need subsamp, data has no struct so can take whatever
     print('Loading Ember...')
-    print('Currently datapath is hardcoded, remember to change that')
 
     yTrain = np.squeeze(pd.read_parquet(f'{dataPath}/train_ember_2018_v2_features.parquet',columns=['Label'])
                         .values.astype('int32'))
